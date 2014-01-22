@@ -106,13 +106,17 @@ case "$1" in
             PORT=$(docker port $ID 6379 | cut -d":" -f2)
 
             # Only set config once
-            if [[ -z $(dokku config:get REDIS_URL) ]]; then
+            if [[ -z $(dokku config:get "$APP" REDIS_URL) ]]; then
                 docker config:set REDIS_URL="redis://$IP:$PORT"
             fi
 
             echo
             echo "-----> $APP linked to $REDIS_IMAGE container"
+        else
+            echo "-----> $APP does not have a redis container to link to"
         fi
+    else
+        echo "-----> $APP does not exist"
     fi
     ;;
 
