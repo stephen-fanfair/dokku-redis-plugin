@@ -104,7 +104,7 @@ case "$1" in
             IP=$(docker inspect $ID | grep IPAddress | awk '{ print $2 }' | tr -d ',"')
 
             # Only set config once
-            if [[ -z $(docker config:get REDIS_URL) ]]; then
+            if [[ -z $(dokku config:get REDIS_URL) ]]; then
                 docker config:set REDIS_URL="redis://$IP:6379"
             fi
 
