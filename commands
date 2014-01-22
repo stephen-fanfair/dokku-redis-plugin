@@ -27,6 +27,7 @@ case "$1" in
         echo "Redis image not found... Did you run 'dokku plugins-install' ?"
         exit 1
     fi
+
     # Check if an existing DB volume exists
     HOST_DIR="$DOKKU_ROOT/.redis/volume-$APP"
     if [[ -d $HOST_DIR ]]; then
@@ -102,10 +103,11 @@ case "$1" in
         # Don't try to link to containers not using redis
         if [[ -z "$ID" ]]; then
             IP=$(docker inspect $ID | grep IPAddress | awk '{ print $2 }' | tr -d ',"')
+            PORT=$(docker port $ID 6379 | cut -d":" -f2)
 
             # Only set config once
             if [[ -z $(dokku config:get REDIS_URL) ]]; then
-                docker config:set REDIS_URL="redis://$IP:6379"
+                docker config:set REDIS_URL="redis://$IP:$PORT"
             fi
 
             echo
