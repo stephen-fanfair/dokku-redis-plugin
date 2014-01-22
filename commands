@@ -1,6 +1,5 @@
-#!/bin/bash
-set -eo pipefail;
-set -e; 
+#!/usr/bin/env bash
+set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
 
 # Check if name is specified
 if [[ $1 == redis:* ]]; then
