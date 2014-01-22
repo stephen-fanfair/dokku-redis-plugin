@@ -60,28 +60,44 @@ case "$1" in
 
   redis:delete)
     REDIS_IMAGE=redis/$APP
+
     # Stop the container
     ID=$(docker ps -a | grep "$REDIS_IMAGE":latest |  awk '{print $1}')
     if [[ ! -z $ID ]]; then
         docker stop $ID
     fi
-    # Remove image
-    IMAGE=$(docker images | grep "$REDIS_IMAGE " |  awk '{print $1}')
-    if [[ ! -z $IMAGE ]]; then
-        docker rmi $IMAGE
-    fi
+
     # Remove persistent volume
     HOST_DIR="$DOKKU_ROOT/.redis/volume-$APP"
     if [[ -d $HOST_DIR ]]; then
         rm -rf $HOST_DIR
     fi
-    echo
-    echo "-----> Redis container deleted: $REDIS_IMAGE"
+
+    # Remove image
+    IMAGE=$(docker images | grep "$REDIS_IMAGE " |  awk '{print $1}')
+    if [[ ! -z $IMAGE ]]; then
+        docker rmi $IMAGE
+
+        echo
+        echo "-----> Redis container deleted: $REDIS_IMAGE"
+    else
+        echo
+        echo "-----> Redis image not found: $REDIS_IMAGE"
+    fi
     ;;
 
   redis:info)
     REDIS_IMAGE=redis/$APP
     ID=$(docker ps -a | grep "$REDIS_IMAGE":latest |  awk '{print $1}')
+
+    # Error out early if there is no app
+    if [[ -z "$ID" ]]; then
+        echo
+        echo "-----> No app found for $APP"
+        echo
+        exit 1
+    fi
+
     IP=$(docker inspect $ID | grep IPAddress | awk '{ print $2 }' | tr -d ',"')
     PORT=$(docker port $ID 6379 | cut -d":" -f2)
     echo
@@ -137,3 +153,4 @@ EOF
     ;;
 
 esac
+cat
